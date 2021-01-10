@@ -1,0 +1,134 @@
+//---------------------------------------------------------------------------
+
+#ifndef TelemeterServer_MainH
+#define TelemeterServer_MainH
+//---------------------------------------------------------------------------
+#include <vcl.h>
+#include <time.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <dos.h>
+#include <dir.h>
+#include <io.h>
+#include "cspin.h"
+#include <Buttons.hpp>
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <ExtCtrls.hpp>
+#include <StdCtrls.hpp>
+//#include <algorithm.h>
+//#include <Math.hpp>
+
+
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "CSPIN.h"
+#include <ExtCtrls.hpp>
+#include <Buttons.hpp>
+#include <Vcl.ComCtrls.hpp>
+//---------------------------------------------------------------------------
+typedef struct
+{
+ double pv;
+ String xName;
+ bool xEnable;
+ bool increment;
+ bool random;
+}TelemetryDataType;
+
+#define MAX_TELEMETRY_DATA 256
+#define LAT 0
+#define LONG 1
+#define ALT_AGL 2
+#define ALT_MSL 3
+#define HEADING 4
+#define TIME_TELEM 5
+#define TIME_MSG 6
+#define THE_CURRENT_MAX_ 7
+
+class TForm_Telemetry_Server : public TForm
+{
+__published:	// IDE-managed Components
+        TMemo *Memo_Log;
+	TPanel *Panel1;
+	TBitBtn *BitBtn_Close;
+	TButton *Button_Start;
+	TPageControl *PageControl1;
+	TTabSheet *TabSheet_Telemetry_Data_Group1;
+	TGroupBox *GroupBox2;
+	TLabel *Label4;
+	TLabel *Label5;
+	TEdit *Edit_AltitudeAglMeters;
+	TEdit *Edit_Latitude;
+	TEdit *Edit_AltitudeMslMeters;
+	TEdit *Edit_Longitude;
+	TLabel *Label1;
+	TLabel *Label2;
+	TLabel *Label3;
+	TLabel *Label6;
+	TLabel *Label7;
+	TEdit *Edit_HeadingDegrees;
+	TEdit *Edit_TimestampTelem;
+	TEdit *Edit_TimeStampMsg;
+	TLabel *Label8;
+	TLabel *Label9;
+	TLabel *Label10;
+	TTabSheet *TabSheet_Data_Group2;
+	TTabSheet *TabSheet_Setup;
+	TCheckBox *CheckBox_Latitude_Enable;
+	TLabel *Label11;
+	TCSpinEdit *CSpinEdit_Interval;
+	TTimer *Timer_Main;
+	TButton *Button_Stop;
+	TCheckBox *CheckBox_Latitude_Increment;
+	TCheckBox *CheckBox_Latitude_Random;
+	TCheckBox *CheckBox_Longitude_Enable;
+	TCheckBox *CheckBox_AltitudeAglMeters_Enable;
+	TCheckBox *CheckBox_AltitudeMslMeters_Enable;
+	TCheckBox *CheckBox_HeadingDegrees_Enable;
+	TCheckBox *CheckBox_TimeStampTelem_Enable;
+	TCheckBox *CheckBox_TimeStampMsg_Enable;
+	TCheckBox *CheckBox_Longitude_Increment;
+	TCheckBox *CheckBox_AltitudeAglMeters_Increment;
+	TCheckBox *CheckBox_AltitudeMslMeters_Increment;
+	TCheckBox *CheckBox_HeadingDegrees_Increment;
+	TCheckBox *CheckBox_TimeStampTelem_Increment;
+	TCheckBox *CheckBox_TimeStampMsg_Increment;
+	TCheckBox *CheckBox_Longitude_Random;
+	TCheckBox *CheckBox_AltitudeAglMeters_Radom;
+	TCheckBox *CheckBox_AltitudeMslMeters_Random;
+	TCheckBox *CheckBox_HeadingDegrees_Random;
+	TCheckBox *CheckBox_TimeStampTelem_Random;
+	TCheckBox *CheckBox_TimeStampMsg_Radom;
+	TLabel *Label12;
+        void __fastcall BitBtn_CloseClick(TObject *Sender);
+		void __fastcall Button_StartClick(TObject *Sender);
+	void __fastcall Timer_MainTimer(TObject *Sender);
+	void __fastcall Button_StopClick(TObject *Sender);
+	void __fastcall CheckBox_Latitude_IncrementClick(TObject *Sender);
+	void __fastcall CheckBox_Latitude_RandomClick(TObject *Sender);
+	void __fastcall Edit_LatitudeKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall CheckBox_Latitude_EnableClick(TObject *Sender);
+
+
+private:	// User declarations
+public:		// User declarations
+
+		TelemetryDataType TelemetryData[MAX_TELEMETRY_DATA];
+		TCheckBox *CheckBox_Enable[MAX_TELEMETRY_DATA];
+		TCheckBox *CheckBox_Increment[MAX_TELEMETRY_DATA];
+		TCheckBox *CheckBox_Random[MAX_TELEMETRY_DATA];
+		TEdit *TEdit_TelemetryData[MAX_TELEMETRY_DATA];
+
+		void __fastcall write_log(String log_info);
+		__fastcall TForm_Telemetry_Server(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TForm_Telemetry_Server *Form_Telemetry_Server;
+//---------------------------------------------------------------------------
+#endif

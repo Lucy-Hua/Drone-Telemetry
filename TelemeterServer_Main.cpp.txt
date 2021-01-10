@@ -1,0 +1,281 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "TelemeterServer_Main.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "CSPIN"
+#pragma link "cspin"
+#pragma resource "*.dfm"
+TForm_Telemetry_Server *Form_Telemetry_Server;
+//---------------------------------------------------------------------------
+__fastcall TForm_Telemetry_Server::TForm_Telemetry_Server(TComponent* Owner)
+        : TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm_Telemetry_Server::BitBtn_CloseClick(TObject *Sender)
+{
+  Close();
+}
+//---------------------------------------------------------------------------
+
+
+
+void __fastcall TForm_Telemetry_Server::Button_StartClick(TObject *Sender)
+{
+ write_log("Program is starting up");
+ Timer_Main->Interval=CSpinEdit_Interval->Value;
+ Timer_Main->Enabled = true;
+ write_log("Timer has started. Interval = " + IntToStr(__int64(Timer_Main->Interval)));
+}
+//---------------------------------------------------------------------------
+
+// A function that determines the number of interesctions and the coordinates for those points
+void __fastcall TForm_Telemetry_Server::write_log(String log_info)
+{
+Memo_Log->Lines->Add(DateTimeToStr(Now())+" "+log_info);
+}
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm_Telemetry_Server::Timer_MainTimer(TObject *Sender)
+{
+ int i;
+ String xs;
+ int err;
+
+ write_log("timer has reset");
+
+//if TelemetryData[xTag].incremnet (do one for each increment, random) below we already
+//deternmined if it was true or not so if it is true then the if statment will
+//continue.
+
+}//end of timer
+
+//---------------------------------------------------------------------------
+
+void __fastcall TForm_Telemetry_Server::Button_StopClick(TObject *Sender)
+{
+ write_log("Program has stopped");
+ Timer_Main->Enabled = false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm_Telemetry_Server::CheckBox_Latitude_IncrementClick(TObject *Sender)
+{
+  TCheckBox *TheCurrentCheckBox=(TCheckBox *)(Sender);
+  int xTag;
+  double xData;
+
+  if(TheCurrentCheckBox==NULL)
+	{
+		return;
+	}
+	else
+	{
+	  xTag=TheCurrentCheckBox->Tag;
+	}
+  if((xTag<0)||(xTag>=THE_CURRENT_MAX_))
+	{
+		write_log("Invalid Data Tag");
+		return;
+	}
+  TelemetryData[xTag].increment=TheCurrentCheckBox->Checked;
+  write_log(TelemetryData[xTag].xName+" increment setting is updated to "+
+			IntToStr(__int64(TelemetryData[xTag].increment)));
+
+  if((TheCurrentCheckBox->Checked)&&(CheckBox_Random[xTag]!=NULL))
+	{
+		if(CheckBox_Random[xTag]->Checked)
+		{
+		  CheckBox_Random[xTag]->Checked = false;
+		  TelemetryData[xTag].random=false;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm_Telemetry_Server::CheckBox_Latitude_RandomClick(TObject *Sender)
+{
+  TCheckBox *TheCurrentCheckBox=(TCheckBox *)(Sender);
+  int xTag;
+  double xData;
+
+  if(TheCurrentCheckBox==NULL)
+	{
+		return;
+	}
+	else
+	{
+	  xTag=TheCurrentCheckBox->Tag;
+	}
+  if((xTag<0)||(xTag>=THE_CURRENT_MAX_))
+	{
+		write_log("Invalid Data Tag");
+		return;
+	}
+  TelemetryData[xTag].random=TheCurrentCheckBox->Checked;
+  write_log(TelemetryData[xTag].xName+" random setting is updated to "+
+			IntToStr(__int64(TelemetryData[xTag].random)));
+
+  if((TheCurrentCheckBox->Checked)&&(CheckBox_Increment[xTag]!=NULL))
+	{
+		if(CheckBox_Increment[xTag]->Checked)
+		{
+		  CheckBox_Increment[xTag]->Checked = false;
+		  TelemetryData[xTag].increment=false;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+void __fastcall TForm_Telemetry_Server::Edit_LatitudeKeyUp(TObject *Sender, WORD &Key,
+		  TShiftState Shift)
+{
+  TEdit *TheCurrentEdit=(TEdit *)(Sender);
+  int xTag;
+  double xData;
+
+  if(TheCurrentEdit==NULL)
+	{
+		return;
+	}
+	else
+	{
+	  xTag=TheCurrentEdit->Tag;
+	}
+  if((xTag<0)||(xTag>=THE_CURRENT_MAX_))
+	{
+		write_log("Invalid Data Tag");
+		return;
+	}
+  if(Key==13)//user type the key of Enter
+	{
+	  try
+	  {
+		  xData=TheCurrentEdit->Text.ToDouble();
+		  /*
+		  may need to check data is valid/reasonable or not
+		  */
+		  TelemetryData[xTag].pv =xData;
+		  write_log(TelemetryData[xTag].xName+" data is updated to "+TheCurrentEdit->Text);
+	  }
+	  catch(...)
+	  {
+	   MessageBox(Handle, "invalid data input", "Alert", MB_OK | MB_ICONWARNING);
+	  }
+	}
+
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm_Telemetry_Server::FormCreate(TObject *Sender)
+{
+
+//*initialize all names and checkboxes
+   TelemetryData[LAT].xName="latitude";
+   CheckBox_Enable[LAT]=CheckBox_Latitude_Enable;
+   CheckBox_Enable[LAT]->Tag=LAT;
+   CheckBox_Increment[LAT]=CheckBox_Latitude_Increment;
+   CheckBox_Increment[LAT]->Tag =LAT;
+   CheckBox_Random[LAT]=CheckBox_Latitude_Random;
+   CheckBox_Random[LAT]->Tag =LAT;
+   TEdit_TelemetryData[LAT]=Edit_Latitude;
+   Edit_Latitude->Tag =LAT;
+
+   TelemetryData[LONG].xName="longitude";
+   CheckBox_Enable[LONG]=CheckBox_Longitude_Enable;
+   CheckBox_Enable[LONG]->Tag=LONG;
+   CheckBox_Increment[LONG]=CheckBox_Longitude_Increment;
+   CheckBox_Increment[LONG]->Tag =LONG;
+   CheckBox_Random[LONG]=CheckBox_Longitude_Random;
+   CheckBox_Random[LONG]->Tag =LONG;
+   TEdit_TelemetryData[LONG]=Edit_Longitude;
+   TEdit_TelemetryData[LONG]->Tag =LONG;
+
+   TelemetryData[ALT_AGL].xName="ALT_AGL";
+   CheckBox_Enable[ALT_AGL]=CheckBox_AltitudeAglMeters_Enable;
+   CheckBox_Enable[ALT_AGL]->Tag=ALT_AGL;
+   CheckBox_Increment[ALT_AGL]=CheckBox_AltitudeAglMeters_Increment;
+   CheckBox_Increment[ALT_AGL]->Tag =ALT_AGL;
+   CheckBox_Random[ALT_AGL]=CheckBox_AltitudeAglMeters_Radom;
+   CheckBox_Random[ALT_AGL]->Tag =ALT_AGL;
+   TEdit_TelemetryData[ALT_AGL]=Edit_AltitudeAglMeters;
+   TEdit_TelemetryData[ALT_AGL]->Tag =ALT_AGL;
+
+   TelemetryData[ALT_MSL].xName="ALT_MSL";
+   CheckBox_Enable[ALT_MSL]=CheckBox_AltitudeMslMeters_Enable;
+   CheckBox_Enable[ALT_MSL]->Tag=ALT_MSL;
+   CheckBox_Increment[ALT_MSL]=CheckBox_AltitudeMslMeters_Increment;
+   CheckBox_Increment[ALT_MSL]->Tag =ALT_MSL;
+   CheckBox_Random[ALT_MSL]=CheckBox_AltitudeMslMeters_Random;
+   CheckBox_Random[ALT_MSL]->Tag =ALT_MSL;
+   TEdit_TelemetryData[ALT_MSL]=Edit_AltitudeMslMeters;
+   TEdit_TelemetryData[ALT_AGL]->Tag =ALT_AGL;
+
+   TelemetryData[HEADING].xName="HEADING";
+   CheckBox_Enable[HEADING]=CheckBox_HeadingDegrees_Enable;
+   CheckBox_Enable[HEADING]->Tag=HEADING;
+   CheckBox_Increment[HEADING]=CheckBox_HeadingDegrees_Increment;
+   CheckBox_Increment[HEADING]->Tag =HEADING;
+   CheckBox_Random[HEADING]=CheckBox_HeadingDegrees_Random;
+   CheckBox_Random[HEADING]->Tag =HEADING;
+   TEdit_TelemetryData[HEADING]=Edit_HeadingDegrees;
+   TEdit_TelemetryData[HEADING]->Tag =HEADING;
+
+   TelemetryData[TIME_TELEM].xName="TIME_TELEM";
+   CheckBox_Enable[TIME_TELEM]=CheckBox_TimeStampTelem_Enable;
+   CheckBox_Enable[TIME_TELEM]->Tag=TIME_TELEM;
+   CheckBox_Increment[TIME_TELEM]=CheckBox_TimeStampTelem_Increment;
+   CheckBox_Increment[TIME_TELEM]->Tag =TIME_TELEM;
+   CheckBox_Random[TIME_TELEM]=CheckBox_TimeStampTelem_Random;
+   CheckBox_Random[TIME_TELEM]->Tag =TIME_TELEM;
+   TEdit_TelemetryData[TIME_TELEM]=Edit_TimestampTelem;
+   TEdit_TelemetryData[TIME_TELEM]->Tag =TIME_TELEM;
+
+   TelemetryData[TIME_MSG].xName="TIME_MSG";
+   CheckBox_Enable[TIME_MSG]=CheckBox_TimeStampMsg_Enable;
+   CheckBox_Enable[TIME_MSG]->Tag=TIME_MSG;
+   CheckBox_Increment[TIME_MSG]=CheckBox_TimeStampMsg_Increment;
+   CheckBox_Increment[TIME_MSG]->Tag =TIME_MSG;
+   CheckBox_Random[TIME_MSG]=CheckBox_TimeStampMsg_Radom;
+   CheckBox_Random[TIME_MSG]->Tag =TIME_MSG;
+   TEdit_TelemetryData[TIME_MSG]=Edit_TimeStampMsg;
+   TEdit_TelemetryData[TIME_MSG]->Tag =TIME_MSG;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm_Telemetry_Server::CheckBox_Latitude_EnableClick(TObject *Sender)
+
+{
+  TCheckBox *TheCurrentCheckBox=(TCheckBox *)(Sender);
+  int xTag;
+  double xData;
+
+  if(TheCurrentCheckBox==NULL)
+	{
+		return;
+	}
+	else
+	{
+	  xTag=TheCurrentCheckBox->Tag;
+	}
+  if((xTag<0)||(xTag>=THE_CURRENT_MAX_))
+	{
+		write_log("Invalid Data Tag");
+		return;
+	}
+  TelemetryData[xTag].xEnable =TheCurrentCheckBox->Checked;
+  write_log(TelemetryData[xTag].xName+" Enabled is updated to "+
+			IntToStr(__int64(TelemetryData[xTag].xEnable)));
+}
+//---------------------------------------------------------------------------
